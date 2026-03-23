@@ -1,12 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { getProducts, deleteProduct } from "../api/product.api";
+import { AuthContext } from "../context/AuthContext";
+import { CartContext } from "../context/CartContext";
 
 export default function Home() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+
+  const { user, logout } = useContext(AuthContext);
+  const { addToCart, cart } = useContext(CartContext);
 
   const navigate = useNavigate();
 
@@ -33,31 +38,67 @@ export default function Home() {
   };
 
   return (
-    <div style={{ padding: 20, maxWidth: 900, margin: "auto" }}>
-      <h1>Product Manager</h1>
-
-      {/* CREATE BUTTON */}
-      <button onClick={() => navigate("/create")}>
-        + Add Product
-      </button>
-
-      {/* SEARCH */}
-      <input
-        placeholder="Search..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        style={{ marginLeft: 10 }}
-      />
-
-      {/* FILTER */}
-      <select
-        onChange={(e) => setCategory(e.target.value)}
-        style={{ marginLeft: 10 }}
+    <div style={{ padding: 20, maxWidth: 1000, margin: "auto" }}>
+      {/* HEADER */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
       >
-        <option value="">All</option>
-        <option value="Laptop">Laptop</option>
-        <option value="Phone">Phone</option>
-      </select>
+        <h1>Product Manager</h1>
+
+        <div>
+          {user ? (
+            <>
+              <span style={{ marginRight: 10 }}>
+                👤 {user.username} ({user.role})
+              </span>
+
+              <button onClick={() => navigate("/cart")}>
+                🛒 Cart ({cart.length})
+              </button>
+
+              <button
+                onClick={logout}
+                style={{ marginLeft: 10 }}
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <button onClick={() => navigate("/login")}>
+              Login
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ACTION BAR */}
+      <div style={{ marginTop: 20 }}>
+        {user?.role === "admin" && (
+          <button onClick={() => navigate("/create")}>
+            + Add Product
+          </button>
+        )}
+
+        <input
+          placeholder="Search..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ marginLeft: 10 }}
+        />
+
+        <select
+          onChange={(e) => setCategory(e.target.value)}
+          style={{ marginLeft: 10 }}
+        >
+          <option value="">All</option>
+          <option value="Laptop">Laptop</option>
+          <option value="Phone">Phone</option>
+        </select>
+      </div>
 
       {/* LIST */}
       {loading ? (
@@ -75,6 +116,7 @@ export default function Home() {
                 marginBottom: 10,
                 display: "flex",
                 gap: 20,
+                alignItems: "center",
               }}
             >
               <img src={p.image} width={120} />
@@ -87,20 +129,32 @@ export default function Home() {
                   {p.name}
                 </h2>
 
-                <p>Price: {p.price}</p>
-                <p>Category: {p.category}</p>
+                <p>💲 {p.price}</p>
+                <p>📦 {p.category}</p>
                 <p>Stock: {p.stock}</p>
 
-                <button onClick={() => handleDelete(p.id)}>
-                  Delete
-                </button>
+                {/* USER ACTION */}
+                {user?.role === "user" && (
+                  <button onClick={() => addToCart(p)}>
+                    Add to cart
+                  </button>
+                )}
 
-                <button
-                  onClick={() => navigate(`/edit/${p.id}`)}
-                  style={{ marginLeft: 10 }}
-                >
-                  Edit
-                </button>
+                {/* ADMIN ACTION */}
+                {user?.role === "admin" && (
+                  <>
+                    <button onClick={() => handleDelete(p.id)}>
+                      Delete
+                    </button>
+
+                    <button
+                      onClick={() => navigate(`/edit/${p.id}`)}
+                      style={{ marginLeft: 10 }}
+                    >
+                      Edit
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           ))}

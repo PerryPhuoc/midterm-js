@@ -23,10 +23,14 @@ export default function Form() {
   }, [id]);
 
   const handleChange = (e) => {
+    setError("");
+  
     setForm({
       ...form,
       [e.target.name]:
-        e.target.type === "number" ? Number(e.target.value) : e.target.value,
+        e.target.type === "number"
+          ? Number(e.target.value)
+          : e.target.value,
     });
   };
 

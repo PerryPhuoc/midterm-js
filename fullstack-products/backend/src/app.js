@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import productRoutes from "./routes/product.routes.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
+import authRoutes from "./routes/auth.routes.js";
 
 const app = express();
 
@@ -13,3 +14,5 @@ app.use("/products", productRoutes);
 app.use(errorHandler);
 
 app.listen(5000, () => console.log("BE running 5000"));
+
+app.use("/auth", authRoutes);
