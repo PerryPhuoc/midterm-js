@@ -11,7 +11,7 @@ export default function Home() {
   const [category, setCategory] = useState("");
 
   const { user, logout } = useContext(AuthContext);
-  const { addToCart, cart } = useContext(CartContext);
+  const { addToCart, totalItems } = useContext(CartContext);
 
   const navigate = useNavigate();
 
@@ -57,7 +57,7 @@ export default function Home() {
               </span>
 
               <button onClick={() => navigate("/cart")}>
-                🛒 Cart ({cart.length})
+                🛒 Cart ({totalItems})
               </button>
 
               <button
