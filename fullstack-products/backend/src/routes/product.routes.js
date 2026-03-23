@@ -4,6 +4,7 @@ import { validateProduct } from "../middlewares/validate.middleware.js";
 
 const r = express.Router();
 
+r.put("/checkout", c.checkout);
 r.get("/", c.getAll);
 r.get("/:id", c.getOne);
 r.post("/", validateProduct, c.create);

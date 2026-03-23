@@ -12,17 +12,29 @@ export function CartProvider({ children }) {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  // ADD → MERGE
+  // ADD → MERGE + CHECK STOCK
   const addToCart = (product) => {
     setCart((prev) => {
       const exist = prev.find((item) => item.id === product.id);
 
+      // ❗ nếu đã có
       if (exist) {
+        if (exist.quantity >= product.stock) {
+          alert("Out of stock!");
+          return prev;
+        }
+
         return prev.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
+      }
+
+      // ❗ nếu chưa có
+      if (product.stock <= 0) {
+        alert("Out of stock!");
+        return prev;
       }
 
       return [...prev, { ...product, quantity: 1 }];
@@ -34,14 +46,19 @@ export function CartProvider({ children }) {
     setCart((prev) => prev.filter((item) => item.id !== id));
   };
 
-  // INCREASE
+  // INCREASE (CÓ CHECK STOCK)
   const increaseQty = (id) => {
     setCart((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
+      prev.map((item) => {
+        if (item.id === id) {
+          if (item.quantity >= item.stock) {
+            alert("Max stock reached!");
+            return item;
+          }
+          return { ...item, quantity: item.quantity + 1 };
+        }
+        return item;
+      })
     );
   };
 

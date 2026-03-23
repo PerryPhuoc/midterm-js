@@ -18,3 +18,6 @@ export const updateProduct = (id, data) =>
 
 export const deleteProduct = (id) =>
   api.delete(`/products/${id}`);
+
+export const checkout = (cart) =>
+  api.put("/products/checkout", cart);

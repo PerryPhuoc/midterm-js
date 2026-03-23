@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { CartContext } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { checkout } from "../api/product.api";
 
 export default function Cart() {
   const {
@@ -14,6 +15,17 @@ export default function Cart() {
   } = useContext(CartContext);
 
   const navigate = useNavigate();
+
+  const handleCheckout = async () => {
+    try {
+      await checkout(cart);
+      alert("Checkout success!");
+      clearCart();
+      navigate("/");
+    } catch (err) {
+      alert(err.response?.data?.message || "Checkout failed");
+    }
+  };
 
   return (
     <div style={{ padding: 20, maxWidth: 900, margin: "auto" }}>
@@ -43,6 +55,7 @@ export default function Cart() {
                 <div style={{ flex: 1 }}>
                   <h3>{item.name}</h3>
                   <p>💲 {item.price}</p>
+                  <p>Stock: {item.stock}</p>
 
                   {/* QUANTITY CONTROL */}
                   <div>
@@ -54,10 +67,19 @@ export default function Cart() {
                       {item.quantity}
                     </span>
 
-                    <button onClick={() => increaseQty(item.id)}>
+                    <button
+                      onClick={() => increaseQty(item.id)}
+                      disabled={item.quantity >= item.stock}
+                    >
                       +
                     </button>
                   </div>
+
+                  {item.quantity >= item.stock && (
+                    <p style={{ color: "red" }}>
+                      Max stock reached
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -78,6 +100,13 @@ export default function Cart() {
           <h2>Total Price: 💲 {totalPrice}</h2>
 
           <button onClick={clearCart}>Clear Cart</button>
+
+          <button
+            onClick={handleCheckout}
+            style={{ marginLeft: 10 }}
+          >
+            Checkout
+          </button>
         </>
       )}
     </div>

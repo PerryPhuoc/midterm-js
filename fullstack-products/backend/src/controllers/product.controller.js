@@ -37,3 +37,23 @@ export const remove = async (req, res, next) => {
     res.json({ message: "Deleted" });
   } catch (e) { next(e); }
 };
+
+// ✅ CHECKOUT CONTROLLER
+export const checkout = async (req, res, next) => {
+  try {
+    const cart = req.body;
+
+    if (!Array.isArray(cart) || cart.length === 0) {
+      return res.status(400).json({ message: "Cart is empty" });
+    }
+
+    const result = await s.checkout(cart);
+
+    res.json({
+      message: "Checkout success",
+      data: result,
+    });
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+};

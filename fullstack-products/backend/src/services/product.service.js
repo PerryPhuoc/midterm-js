@@ -55,3 +55,38 @@ export const remove = async (id) => {
 
   return true;
 };
+
+export const checkout = async (cart) => {
+  const data = await readData();
+
+  for (let item of cart) {
+    const product = data.find(p => p.id === item.id);
+
+    if (!product) {
+      throw new Error(`Product not found: ${item.id}`);
+    }
+
+    if (product.stock < item.quantity) {
+      throw new Error(
+        `Not enough stock for ${product.name}`
+      );
+    }
+  }
+
+  const updated = data.map(p => {
+    const item = cart.find(c => c.id === p.id);
+
+    if (item) {
+      return {
+        ...p,
+        stock: p.stock - item.quantity
+      };
+    }
+
+    return p;
+  });
+
+  await writeData(updated);
+
+  return updated;
+};
