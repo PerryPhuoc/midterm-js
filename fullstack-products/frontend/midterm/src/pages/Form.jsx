@@ -1,15 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  createProduct,
-  getProduct,
-  updateProduct,
-} from "../api/product.api";
+import { createProduct, getProduct, updateProduct } from "../api/product.api";
 
 export default function Form() {
   const { id } = useParams();
   const navigate = useNavigate();
-
+  const [error, setError] = useState("");
   const isEdit = !!id;
 
   const [form, setForm] = useState({
@@ -30,9 +26,7 @@ export default function Form() {
     setForm({
       ...form,
       [e.target.name]:
-        e.target.type === "number"
-          ? Number(e.target.value)
-          : e.target.value,
+        e.target.type === "number" ? Number(e.target.value) : e.target.value,
     });
   };
 
@@ -42,16 +36,26 @@ export default function Form() {
     if (isEdit) {
       await updateProduct(id, form);
     } else {
-      await createProduct(form);
-    }
+      try {
+        if (isEdit) {
+          await updateProduct(id, form);
+        } else {
+          await createProduct(form);
+        }
 
-    navigate("/");
+        navigate("/");
+      } catch (err) {
+        console.error(err);
+
+        alert(err.response?.data?.message || "Something went wrong");
+      }
+    }
   };
 
   return (
     <div style={{ padding: 20 }}>
       <h1>{isEdit ? "Edit Product" : "Add Product"}</h1>
-
+      {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit}>
         <input
           name="name"
@@ -95,9 +99,7 @@ export default function Form() {
           required
         />
 
-        <button type="submit">
-          {isEdit ? "Update" : "Create"}
-        </button>
+        <button type="submit">{isEdit ? "Update" : "Create"}</button>
 
         <button type="button" onClick={() => navigate("/")}>
           Cancel
